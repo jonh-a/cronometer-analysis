@@ -10,8 +10,8 @@ def get_args():
         description="analyzes your cronometer data",
     )
 
-    parser.add_argument('daily_summary_csv')
-    parser.add_argument('servings_csv')
+    parser.add_argument('--summary', required=True)
+    parser.add_argument('--foods', required=False)
     parser.add_argument('-c', '--complete-only', action='store_true', default=False)
     parser.add_argument('-u', '--disregard-under')
     parser.add_argument('-a', '--disregard-above')
@@ -28,7 +28,7 @@ def parse_csv(file_path):
         exit(1)
 
 
-def merge_data(summary_df, servings_df):
+def merge_summary_and_foods_data(summary_df, servings_df):
     merged_df = summary_df.copy()
     merged_df['_foods'] = merged_df['Date'].apply(
         lambda date: servings_df[servings_df['Day'] == date].to_dict(orient='records')
@@ -58,35 +58,41 @@ def calculate_daily_avg(data):
     invalid_fieldnames = ["Date", "Completed", "_foods"]
     valid_columns = [col for col in data.columns if col not in invalid_fieldnames]
     
-    daily_avgs = data[valid_columns].mean().to_dict()
+    daily_avgs = round(data[valid_columns].mean(), 2).to_dict()
     return daily_avgs
 
 
 if __name__ == "__main__":
     args = get_args()
 
-
-    daily_summary_csv = args.daily_summary_csv
-    servings_csv = args.servings_csv
+    daily_summary_csv = args.summary
+    servings_csv = args.foods
     complete_only = args.complete_only
     disregard_under = args.disregard_under
     disregard_above = args.disregard_above
     since = args.since
 
-    summary_df = parse_csv(daily_summary_csv)
-    servings_df = parse_csv(servings_csv)
+    data = parse_csv(daily_summary_csv)
 
-    merged_data = merge_data(summary_df, servings_df) 
+    if servings_csv:
+        servings_df = parse_csv(servings_csv)
+        data = merge_summary_and_foods_data(data, servings_df)
     
     if complete_only:
-        merged_data = filter_complete(merged_data)
+        data = filter_complete(data)
 
     if disregard_under:
-        merged_data = filter_out_under(merged_data, disregard_under)
+        data = filter_out_under(data, disregard_under)
 
     if since:
-        merged_data = filter_since(merged_data, since)
+        data = filter_since(data, since)
 
-    daily_avgs = calculate_daily_avg(merged_data)
+    daily_avgs = calculate_daily_avg(data)
 
-    print(json.dumps(daily_avgs))
+    parsed_data = {
+        "averages": {
+            "daily_averages": daily_avgs,
+        }
+    }
+
+    print(json.dumps(parsed_data))
