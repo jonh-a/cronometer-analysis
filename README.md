@@ -11,7 +11,7 @@ pip install -r requirements.txt
 
 Next, export your nutrition data from Cronometer. You can do this by logging into [cronometer.com](https://www.cronometer.com), navigating to More > Account, and exporting your Daily Nutrition and Food & Recipe entires for the desired timeframe. 
 
-![image](img/cronometer_export.png)
+<img src="img/cronometer_export.png" width=250>
 
 If you've been logging for a while, you may not be able to export the Food & Recipe entires for all time, so you may have to settle for a year.
 
@@ -37,4 +37,4 @@ Returns a line graph displaying the daily micronutrient over time. Provide the m
 python3 cronometer.py time --summary path/to/dailysummary.csv --track="Energy (kcal)"
 ```
 
-![image](img/over_time.png)
+<img src="img/over_time.png" width=350>
