@@ -1,6 +1,6 @@
-import argparse
 import pandas as pd
-import numpy as np
+from rich import print_json
+import argparse
 import json
 
 
@@ -10,12 +10,13 @@ def get_args():
         description="analyzes your cronometer data",
     )
 
-    parser.add_argument('--summary', required=True)
-    parser.add_argument('--foods', required=False)
-    parser.add_argument('-c', '--complete-only', action='store_true', default=False)
-    parser.add_argument('-u', '--disregard-under')
-    parser.add_argument('-a', '--disregard-above')
-    parser.add_argument('-s', '--since')
+    parser.add_argument('--summary', required=True, help="path to dailysummary.csv")
+    parser.add_argument('--foods', required=False, help="path to servings.csv")
+    parser.add_argument('--complete-only', action='store_true', help="calculate using complete days only")
+    parser.add_argument('--disregard-under', help="disregard days under N calories", type=int)
+    parser.add_argument('--disregard-above', help="disregard days over N calories", type=int)
+    parser.add_argument('--since', help="calculate using days since (YYYY-MM-DD)")
+    parser.add_argument('--json', action='store_true', help="return json output", default=True)
 
     return parser.parse_args()
 
@@ -65,27 +66,23 @@ def calculate_daily_avg(data):
 if __name__ == "__main__":
     args = get_args()
 
-    daily_summary_csv = args.summary
-    servings_csv = args.foods
-    complete_only = args.complete_only
-    disregard_under = args.disregard_under
-    disregard_above = args.disregard_above
-    since = args.since
+    data = parse_csv(args.summary)
 
-    data = parse_csv(daily_summary_csv)
-
-    if servings_csv:
-        servings_df = parse_csv(servings_csv)
+    if args.foods:
+        servings_df = parse_csv(args.foods)
         data = merge_summary_and_foods_data(data, servings_df)
     
-    if complete_only:
+    if args.complete_only:
         data = filter_complete(data)
 
-    if disregard_under:
-        data = filter_out_under(data, disregard_under)
+    if args.disregard_under:
+        data = filter_out_under(data, args.disregard_under)
 
-    if since:
-        data = filter_since(data, since)
+    if args.disregard_above:
+        data = filter_out_over(data, args.disregard_above)
+
+    if args.since:
+        data = filter_since(data, args.since)
 
     daily_avgs = calculate_daily_avg(data)
 
@@ -95,4 +92,6 @@ if __name__ == "__main__":
         }
     }
 
-    print(json.dumps(parsed_data))
+    if args.json:
+        print_json(json.dumps(parsed_data))
+        exit(0)
