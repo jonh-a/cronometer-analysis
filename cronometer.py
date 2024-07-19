@@ -10,7 +10,6 @@ from utils import (
     filter_out_under, 
     filter_since, 
     calculate_total_avg, 
-    merge_summary_and_foods_data, 
     normalize_nutrient_name,
     plot_nutrients,
     identify_nutrient_density,
@@ -46,7 +45,6 @@ def get_args():
 
     return parser.parse_args()
     
-
 
 def parse_csv(file_path):
     try:
@@ -111,7 +109,6 @@ def density(args):
         print_json(json.dumps(identify_nutrient_density(data, nutrient, top)))
 
     
-
 if __name__ == "__main__":
     args = get_args()
     
