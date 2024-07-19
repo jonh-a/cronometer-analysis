@@ -19,13 +19,13 @@ If you've been logging for a while, you may not be able to export the Food & Rec
 
 Returns your average quantity of each tracked micronutrient (glorified average of all columns).
 
-```bash
+```
 python3 cronometer.py get-average --summary path/to/dailysummary.csv
 ```
 
 Optionally, set a time frame (`--since="2023-12-25"`) or exclude outlier days under or over certain calorie threshold (`--disregard-under=1000 --disregard-above=2600`). Additionally, you can disregard days that were not marked as "complete" (`--complete-only`).
 
-```bash
+```
 python3 cronometer.py get-average --summary path/to/dailysummary.csv --disregard-under=1000 --disregard-above=2600 --complete-only
 ```
 
@@ -33,8 +33,16 @@ python3 cronometer.py get-average --summary path/to/dailysummary.csv --disregard
 
 Returns a line graph displaying the daily micronutrient over time. Provide the micronutrient you wish to track with the `--track` argument.
 
-```bash
+```
 python3 cronometer.py time --summary path/to/dailysummary.csv --track="Energy (kcal)"
 ```
 
 <img src="img/over_time.png" width=350>
+
+## Macronutrient density
+
+Returns a list of the food items with the highest quantity of a particular micro-/macro-nutrient per calorie.
+
+```
+python3 cronometer.py density --foods path/to/services.csv --since="2023-08-01" --top=10 --nutrient="protein"
+```

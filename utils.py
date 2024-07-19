@@ -1,4 +1,7 @@
 from micronutrients import micronutrients
+import pandas as pd
+import asciichartpy
+import shutil
 
 def filter_complete(data):
     return data[data['Completed'] == True]
@@ -14,12 +17,12 @@ def filter_out_over(data, over):
     return data[data["Energy (kcal)"] < over]
 
 
-def filter_since(data, since):
-    return data[data["Date"] >= since]
+def filter_since(data, since, filter_by="Date"):
+    return data[data[filter_by] >= since]
 
 
-def filter_by_nutrient(data, nutrients):
-    keep_columns = [*nutrients, "Date"]
+def filter_by_nutrient(data, nutrients, date_column_name="Date"):
+    keep_columns = [*nutrients, date_column_name]
     return data.filter(items=keep_columns)
 
 
@@ -46,3 +49,50 @@ def normalize_nutrient_name(input):
     except KeyError:
         print(f"Failed to find {input}.")
         exit(1)
+
+
+def plot_nutrients(data, nutrients):
+    terminal_size = shutil.get_terminal_size((80, 20))
+    width = terminal_size.columns - 20 
+    height = terminal_size.lines - 5 
+
+    for nutrient in nutrients:
+        dates = pd.to_datetime(data['Date']).dt.strftime('%Y-%m-%d').tolist()
+        values = data[nutrient].tolist()
+        
+        if len(values) > width:
+            factor = len(values) // width
+            condensed_values = values[::factor]
+        else:
+            condensed_values = values
+        
+        print(f"\n{nutrient} over time ({dates[0]} - {dates[-1]})")
+
+        print(asciichartpy.plot(condensed_values, {'height': height}))
+
+
+def identify_nutrient_density(data, nutrient, top=5):
+    foods = {}
+
+    for i, row in data.iterrows():
+        food_name = row["Food Name"]
+        nutrient_value = row[nutrient]
+        calories = row["Energy (kcal)"]
+        day = row["Day"]
+
+        if (
+            pd.notna(nutrient_value) 
+            and nutrient_value > 0 
+            and pd.notna(calories) 
+            and calories > 0
+        ):
+            density = round(nutrient_value / calories, 3)
+            if food_name not in foods:
+                foods[food_name] = density
+            elif foods[food_name] != density:
+                foods[f"{food_name} ({day})"] = density
+
+    sorted_items = sorted(foods.items(), key=lambda item: item[1], reverse=True)
+    top_items = [{"name": key, f"{nutrient} per calorie": value} for key, value in sorted_items[:top]]
+
+    return top_items
