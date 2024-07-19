@@ -101,12 +101,14 @@ def density(args):
     if args.since:
         data = filter_since(data, args.since, "Day")
 
+    per = "Energy (kcal)"
+
     normalized_nutrient_names = []
     for nutrient in args.nutrient:
         normalized_nutrient_names.append(normalize_nutrient_name(nutrient.lower()))
 
     for nutrient in normalized_nutrient_names:
-        print_json(json.dumps(identify_nutrient_density(data, nutrient, top)))
+        print_json(json.dumps(identify_nutrient_density(data, nutrient, per, top)))
 
     
 if __name__ == "__main__":

@@ -71,25 +71,30 @@ def plot_nutrients(data, nutrients):
         print(asciichartpy.plot(condensed_values, {'height': height}))
 
 
-def identify_nutrient_density(data, nutrient, top=5):
+def identify_nutrient_density(data, nutrient, per="Energy (kcal)", top=5):
     foods = {}
 
     for i, row in data.iterrows():
         food_name = row["Food Name"]
         nutrient_value = row[nutrient]
-        calories = row["Energy (kcal)"]
+        units = row[per]
         day = row["Day"]
 
         if (
             pd.notna(nutrient_value) 
             and nutrient_value > 0 
-            and pd.notna(calories) 
-            and calories > 0
+            and pd.notna(units) 
+            and units > 0
         ):
-            density = round(nutrient_value / calories, 3)
+            density = round(nutrient_value / units, 3)
+            """
+            if the new density exists in the map and the value 
+            differs by more than 1% of the existing value, 
+            then add it in with the date to differentiate the two.
+            """
             if food_name not in foods:
                 foods[food_name] = density
-            elif foods[food_name] != density:
+            elif abs(density - foods[food_name]) > (density * 0.01):
                 foods[f"{food_name} ({day})"] = density
 
     sorted_items = sorted(foods.items(), key=lambda item: item[1], reverse=True)
