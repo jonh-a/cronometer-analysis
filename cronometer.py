@@ -5,6 +5,17 @@ import json
 import asciichartpy
 import shutil
 
+from utils import (
+    filter_by_nutrient, 
+    filter_complete, 
+    filter_out_over, 
+    filter_out_under, 
+    filter_since, 
+    calculate_total_avg, 
+    merge_summary_and_foods_data, 
+    normalize_nutrient_name,
+)
+
 
 def get_args():
     parser = argparse.ArgumentParser(
@@ -38,45 +49,6 @@ def parse_csv(file_path):
         exit(1)
 
 
-def merge_summary_and_foods_data(summary_df, servings_df):
-    merged_df = summary_df.copy()
-    merged_df['_foods'] = merged_df['Date'].apply(
-        lambda date: servings_df[servings_df['Day'] == date].to_dict(orient='records')
-    )
-    return merged_df
-
-
-def filter_complete(data):
-    return data[data['Completed'] == True]
-
-
-def filter_out_under(data, under):
-    under = float(under)
-    return data[data["Energy (kcal)"] > under]
-
-
-def filter_out_over(data, over):
-    over = float(over)
-    return data[data["Energy (kcal)"] < over]
-
-
-def filter_since(data, since):
-    return data[data["Date"] >= since]
-
-
-def filter_by_nutrient(data, nutrients):
-    keep_columns = [*nutrients, "Date"]
-    return data.filter(items=keep_columns)
-
-
-def calculate_total_avg(data):
-    invalid_fieldnames = ["Date", "Completed", "_foods"]
-    valid_columns = [col for col in data.columns if col not in invalid_fieldnames]
-    
-    total_avgs = round(data[valid_columns].mean(), 2).to_dict()
-    return total_avgs
-
-
 def get_average(args):
     data = parse_csv(args.summary)
     
@@ -106,9 +78,13 @@ def track_nutrients_over_time(args):
     if args.since:
         data = filter_since(data, args.since)
 
-    filtered_data = filter_by_nutrient(data, args.track)
+    normalized_nutrient_names = []
+    for nutrient in args.track:
+        normalized_nutrient_names.append(normalize_nutrient_name(nutrient.lower()))
+
+    filtered_data = filter_by_nutrient(data, normalized_nutrient_names)
     
-    plot_nutrients(filtered_data, args.track)
+    plot_nutrients(filtered_data, normalized_nutrient_names)
 
 
 def plot_nutrients(data, nutrients):
