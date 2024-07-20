@@ -1,4 +1,4 @@
-from micronutrients import micronutrients
+from .micronutrients import micronutrients
 import pandas as pd
 import asciichartpy
 import shutil

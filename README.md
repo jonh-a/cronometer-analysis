@@ -20,13 +20,13 @@ If you've been logging for a while, you may not be able to export the Food & Rec
 Returns your average quantity of each tracked micronutrient (glorified average of all columns).
 
 ```
-python3 cronometer.py get-average --summary path/to/dailysummary.csv
+python3 cronometer.py average --summary path/to/dailysummary.csv
 ```
 
 Optionally, set a time frame (`--since="2023-12-25"`) or exclude outlier days under or over certain calorie threshold (`--disregard-under=1000 --disregard-above=2600`). Additionally, you can disregard days that were not marked as "complete" (`--complete-only`).
 
 ```
-python3 cronometer.py get-average --summary path/to/dailysummary.csv --disregard-under=1000 --disregard-above=2600 --complete-only
+python3 cronometer.py average --summary path/to/dailysummary.csv --disregard-under=1000 --disregard-above=2600 --complete-only
 ```
 
 ## Micronutrients over time
