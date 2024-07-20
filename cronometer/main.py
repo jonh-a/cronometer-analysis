@@ -3,7 +3,7 @@ from rich import print_json
 import argparse
 import json
 
-from utils import (
+from .utils import (
     filter_by_nutrient, 
     filter_complete, 
     filter_out_over, 
@@ -23,7 +23,7 @@ def get_args():
     )
     
     subparsers = parser.add_subparsers(dest='subcommand')
-    average_parser = subparsers.add_parser('get-average')
+    average_parser = subparsers.add_parser('average')
     average_parser.add_argument('--summary', required=True, help="path to dailysummary.csv")
     average_parser.add_argument('--complete-only', action='store_true', help="calculate using complete days only")
     average_parser.add_argument('--disregard-above', help="disregard days over N calories", type=int)
@@ -110,13 +110,17 @@ def density(args):
     for nutrient in normalized_nutrient_names:
         print_json(json.dumps(identify_nutrient_density(data, nutrient, per, top)))
 
-    
-if __name__ == "__main__":
+
+def main():
     args = get_args()
     
-    if args.subcommand == 'get-average':
+    if args.subcommand == 'average':
         get_average(args)
     elif args.subcommand == 'time':
         track_nutrients_over_time(args)
     elif args.subcommand == 'density':
         density(args)
+
+    
+if __name__ == "__main__":
+    main()
