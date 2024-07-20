@@ -4,10 +4,10 @@ import asciichartpy
 import shutil
 from rich.console import Console
 from rich.table import Table
-
+from rich import box
 
 def filter_complete(data):
-    return data[data['Completed'] == True]
+    return data[data["Completed"] == True]
 
 
 def filter_out_under(data, under):
@@ -31,8 +31,8 @@ def filter_by_nutrient(data, nutrients, date_column_name="Date"):
 
 def merge_summary_and_foods_data(summary_df, servings_df):
     merged_df = summary_df.copy()
-    merged_df['_foods'] = merged_df['Date'].apply(
-        lambda date: servings_df[servings_df['Day'] == date].to_dict(orient='records')
+    merged_df["_foods"] = merged_df["Date"].apply(
+        lambda date: servings_df[servings_df["Day"] == date].to_dict(orient="records")
     )
     return merged_df
 
@@ -60,7 +60,7 @@ def plot_nutrients(data, nutrients):
     height = terminal_size.lines - 5 
 
     for nutrient in nutrients:
-        dates = pd.to_datetime(data['Date']).dt.strftime('%Y-%m-%d').tolist()
+        dates = pd.to_datetime(data["Date"]).dt.strftime("%Y-%m-%d").tolist()
         values = data[nutrient].tolist()
         
         if len(values) > width:
@@ -70,8 +70,7 @@ def plot_nutrients(data, nutrients):
             condensed_values = values
         
         print(f"\n{nutrient} over time ({dates[0]} - {dates[-1]})")
-
-        print(asciichartpy.plot(condensed_values, {'height': height}))
+        print(asciichartpy.plot(condensed_values, {"height": height}))
 
 
 def identify_nutrient_density(data, nutrient, per="Energy (kcal)", top=5):
@@ -107,7 +106,7 @@ def identify_nutrient_density(data, nutrient, per="Energy (kcal)", top=5):
 
 
 def print_table(data, title, type):
-    table = Table(title=title)
+    table = Table(title=title, box=box.ROUNDED)
 
     if type == "averages":
         table.add_column("Nutrient")
@@ -118,7 +117,7 @@ def print_table(data, title, type):
 
     if type == "density":
         table.add_column("Food")
-        table.add_column(list(data[0].keys())[1])
+        table.add_column(list(data[0].keys())[1], justify="right")
 
         for i in data:
             table.add_row(i["name"], str(i[list(i.keys())[1]]))
