@@ -7,6 +7,7 @@ CLI tool that provides an analysis of your Cronometer data.
 Clone the repo and install the project dependencies.
 ```bash
 pip install -r requirements.txt
+pip install .
 ```
 
 Next, export your nutrition data from Cronometer. You can do this by logging into [cronometer.com](https://www.cronometer.com), navigating to More > Account, and exporting your Daily Nutrition and Food & Recipe entires for the desired timeframe. 
@@ -20,13 +21,13 @@ If you've been logging for a while, you may not be able to export the Food & Rec
 Returns your average quantity of each tracked micronutrient (glorified average of all columns).
 
 ```
-python3 cronometer.py average --summary path/to/dailysummary.csv
+cronometer average --summary path/to/dailysummary.csv
 ```
 
 Optionally, set a time frame (`--since="2023-12-25"`) or exclude outlier days under or over certain calorie threshold (`--disregard-under=1000 --disregard-above=2600`). Additionally, you can disregard days that were not marked as "complete" (`--complete-only`).
 
 ```
-python3 cronometer.py average --summary path/to/dailysummary.csv --disregard-under=1000 --disregard-above=2600 --complete-only
+cronometer average --summary path/to/dailysummary.csv --disregard-under=1000 --disregard-above=2600 --complete-only
 ```
 
 ## Micronutrients over time
@@ -34,7 +35,7 @@ python3 cronometer.py average --summary path/to/dailysummary.csv --disregard-und
 Returns a line graph displaying the daily micronutrient over time. Provide the micronutrient you wish to track with the `--track` argument.
 
 ```
-python3 cronometer.py time --summary path/to/dailysummary.csv --track="Energy (kcal)"
+cronometer time --summary path/to/dailysummary.csv --track="Energy (kcal)"
 ```
 
 <img src="img/over_time.png" width=350>
@@ -44,5 +45,9 @@ python3 cronometer.py time --summary path/to/dailysummary.csv --track="Energy (k
 Returns a list of the food items with the highest quantity of a particular micro-/macro-nutrient per calorie.
 
 ```
-python3 cronometer.py density --foods path/to/services.csv --since="2023-08-01" --top=10 --nutrient="protein"
+cronometer density --foods path/to/services.csv --since="2023-08-01" --top=10 --nutrient="protein"
 ```
+
+# Local development
+
+Run `python3 -m cronometer.main` followed by the appropriate command line args.
