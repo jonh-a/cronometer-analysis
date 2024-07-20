@@ -2,6 +2,9 @@ from .micronutrients import micronutrients
 import pandas as pd
 import asciichartpy
 import shutil
+from rich.console import Console
+from rich.table import Table
+
 
 def filter_complete(data):
     return data[data['Completed'] == True]
@@ -74,7 +77,7 @@ def plot_nutrients(data, nutrients):
 def identify_nutrient_density(data, nutrient, per="Energy (kcal)", top=5):
     foods = {}
 
-    for i, row in data.iterrows():
+    for _, row in data.iterrows():
         food_name = row["Food Name"]
         nutrient_value = row[nutrient]
         units = row[per]
@@ -101,3 +104,24 @@ def identify_nutrient_density(data, nutrient, per="Energy (kcal)", top=5):
     top_items = [{"name": key, f"{nutrient} per calorie": value} for key, value in sorted_items[:top]]
 
     return top_items
+
+
+def print_table(data, title, type):
+    table = Table(title=title)
+
+    if type == "averages":
+        table.add_column("Nutrient")
+        table.add_column("Average/day")
+
+        for k, v in data.items():
+            table.add_row(k, str(v))
+
+    if type == "density":
+        table.add_column("Food")
+        table.add_column(list(data[0].keys())[1])
+
+        for i in data:
+            table.add_row(i["name"], str(i[list(i.keys())[1]]))
+
+    console = Console()
+    console.print(table)

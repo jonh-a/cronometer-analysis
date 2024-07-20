@@ -13,6 +13,7 @@ from .utils import (
     normalize_nutrient_name,
     plot_nutrients,
     identify_nutrient_density,
+    print_table,
 )
 
 
@@ -29,7 +30,7 @@ def get_args():
     average_parser.add_argument('--disregard-above', help="disregard days over N calories", type=int)
     average_parser.add_argument('--disregard-under', help="disregard days under N calories", type=int)
     average_parser.add_argument('--since', help="calculate using days since (YYYY-MM-DD)")
-    average_parser.add_argument('--json', action='store_true', help="return json output", default=True)
+    average_parser.add_argument('--json', action='store_true', help="return json output", default=False)
 
     time_parser = subparsers.add_parser('time')
     time_parser.add_argument('--summary', required=True, help="path to dailysummary.csv")
@@ -42,6 +43,7 @@ def get_args():
     density_parser.add_argument('--since', help="calculate using days since (YYYY-MM-DD)")
     density_parser.add_argument('--nutrient', help="nutrient to track", action='append', required=True)
     density_parser.add_argument('--top', type=int, help="number of items")
+    density_parser.add_argument('--json', action='store_true', help="return json output", default=False)
 
     return parser.parse_args()
     
@@ -67,11 +69,14 @@ def get_average(args):
         data = filter_since(data, args.since)
 
     total_avgs = calculate_total_avg(data)
-    parsed_data = {"total_avgs": total_avgs}
+    parsed_data = total_avgs
 
     if args.json:
         print_json(json.dumps(parsed_data))
-        exit(0)
+    else:
+        print_table(parsed_data, title="Averages", type="averages")
+
+    
 
 
 def track_nutrients_over_time(args):
@@ -108,7 +113,11 @@ def density(args):
         normalized_nutrient_names.append(normalize_nutrient_name(nutrient.lower()))
 
     for nutrient in normalized_nutrient_names:
-        print_json(json.dumps(identify_nutrient_density(data, nutrient, per, top)))
+        nutrient_density = identify_nutrient_density(data, nutrient, per, top)
+        if args.json:
+            print_json(json.dumps(nutrient_density))
+        else:
+            print_table(nutrient_density, title=f"", type="density")
 
 
 def main():
