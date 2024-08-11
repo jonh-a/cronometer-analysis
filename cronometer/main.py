@@ -76,8 +76,6 @@ def get_average(args):
     else:
         print_table(parsed_data, title="Averages", type="averages")
 
-    
-
 
 def track_nutrients_over_time(args):
     data = parse_csv(args.summary)
