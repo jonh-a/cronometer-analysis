@@ -1,10 +1,10 @@
 from .micronutrients import micronutrients
 import pandas as pd
-import asciichartpy
-import shutil
 from rich.console import Console
 from rich.table import Table
 from rich import box
+import matplotlib.pyplot as plt
+
 
 def filter_complete(data):
     return data[data["Completed"] == True]
@@ -54,23 +54,17 @@ def normalize_nutrient_name(input):
         exit(1)
 
 
-def plot_nutrients(data, nutrients):
-    terminal_size = shutil.get_terminal_size((80, 20))
-    width = terminal_size.columns - 20 
-    height = terminal_size.lines - 5 
+def plot_nutrients(data, nutrient):
+    data["Date"] = pd.to_datetime(data["Date"])
 
-    for nutrient in nutrients:
-        dates = pd.to_datetime(data["Date"]).dt.strftime("%Y-%m-%d").tolist()
-        values = data[nutrient].tolist()
-        
-        if len(values) > width:
-            factor = len(values) // width
-            condensed_values = values[::factor]
-        else:
-            condensed_values = values
-        
-        print(f"\n{nutrient} over time ({dates[0]} - {dates[-1]})")
-        print(asciichartpy.plot(condensed_values, {"height": height}))
+    plt.plot(data["Date"], data[nutrient])
+
+    dates = pd.to_datetime(data["Date"]).dt.strftime("%Y-%m-%d").tolist()
+    plt.title(f"\n{nutrient} over time ({dates[0]} - {dates[-1]})")
+    plt.xlabel("Date")
+    plt.ylabel(nutrient)
+
+    plt.show()
 
 
 def identify_nutrient_density(data, nutrient, per="Energy (kcal)", top=5):

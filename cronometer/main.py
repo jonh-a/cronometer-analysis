@@ -1,5 +1,6 @@
 import pandas as pd
 from rich import print_json
+import matplotlib.pyplot as plt
 import argparse
 import json
 
@@ -36,12 +37,12 @@ def get_args():
     time_parser.add_argument("--summary", required=True, help="path to dailysummary.csv")
     time_parser.add_argument("--complete-only", action="store_true", help="calculate using complete days only")
     time_parser.add_argument("--since", help="calculate using days since (YYYY-MM-DD)")
-    time_parser.add_argument("--nutrient", help="nutrient to track", action="append", required=True)
+    time_parser.add_argument("--nutrient", help="nutrient to track", required=True)
 
     density_parser = subparsers.add_parser("density", help="top N items by specified micronutrient density")
     density_parser.add_argument("--foods", required=True, help="path to servings.csv")
     density_parser.add_argument("--since", help="calculate using days since (YYYY-MM-DD)")
-    density_parser.add_argument("--nutrient", help="nutrient to track", action="append", required=True)
+    density_parser.add_argument("--nutrient", help="nutrient to track", required=True)
     density_parser.add_argument("--top", type=int, help="number of items")
     density_parser.add_argument("--json", action="store_true", help="return json output", default=False)
 
@@ -85,13 +86,10 @@ def get_nutrients_over_time(args):
     if args.since:
         data = filter_since(data, args.since)
 
-    normalized_nutrient_names = []
-    for nutrient in args.nutrient:
-        normalized_nutrient_names.append(normalize_nutrient_name(nutrient.lower()))
-
-    filtered_data = filter_by_nutrient(data, normalized_nutrient_names)
+    nutrient = normalize_nutrient_name(args.nutrient.lower())
     
-    plot_nutrients(filtered_data, normalized_nutrient_names)
+    filtered_data = filter_by_nutrient(data, [nutrient])
+    plot_nutrients(filtered_data, nutrient)
 
 
 def get_top_items_by_density(args):
@@ -105,17 +103,13 @@ def get_top_items_by_density(args):
         data = filter_since(data, args.since, "Day")
 
     per = "Energy (kcal)"
+    nutrient = normalize_nutrient_name(args.nutrient)
+    nutrient_density = identify_nutrient_density(data, nutrient, per, top)
 
-    normalized_nutrient_names = []
-    for nutrient in args.nutrient:
-        normalized_nutrient_names.append(normalize_nutrient_name(nutrient.lower()))
-
-    for nutrient in normalized_nutrient_names:
-        nutrient_density = identify_nutrient_density(data, nutrient, per, top)
-        if args.json:
-            print_json(json.dumps(nutrient_density))
-        else:
-            print_table(nutrient_density, title=f"", type="density")
+    if args.json:
+        print_json(json.dumps(nutrient_density))
+    else:
+        print_table(nutrient_density, title=f"", type="density")
 
 
 def main():
