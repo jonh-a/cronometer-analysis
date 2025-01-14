@@ -56,7 +56,7 @@ def parse_csv(file_path):
         exit(1)
 
 
-def get_average(args):
+def get_micronutrient_average(args):
     data = parse_csv(args.summary)
     
     if args.complete_only:
@@ -77,7 +77,7 @@ def get_average(args):
         print_table(parsed_data, title="Averages", type="averages")
 
 
-def track_nutrients_over_time(args):
+def get_nutrients_over_time(args):
     data = parse_csv(args.summary)
     
     if args.complete_only:
@@ -94,7 +94,7 @@ def track_nutrients_over_time(args):
     plot_nutrients(filtered_data, normalized_nutrient_names)
 
 
-def density(args):
+def get_top_items_by_density(args):
     data = parse_csv(args.foods)
 
     top = 5
@@ -122,11 +122,11 @@ def main():
     args = get_args()
     
     if args.subcommand == "average":
-        get_average(args)
+        get_micronutrient_average(args)
     elif args.subcommand == "time":
-        track_nutrients_over_time(args)
+        get_nutrients_over_time(args)
     elif args.subcommand == "density":
-        density(args)
+        get_top_items_by_density(args)
 
     
 if __name__ == "__main__":
